@@ -3,6 +3,52 @@ defmodule WhatsappElixir.Static do
   Utility functions for processing data received from the WhatsApp webhook.
   """
 
+  def handle_notification(data) do
+    case get_message_type(data) do
+      nil ->
+        %Whatsapp.Meta.Request{
+          meta_request: [
+            status_code: 200,
+            waba_id: get_waba_id(data),
+            phone_number_id: get_phone_number_id(data),
+            display_phone_number: get_display_phone_number(data),
+            wa_message_id: get_message_id(data),
+            sender_phone_number:  get_mobile(data),
+            status: get_message_status(data),
+            billable: get_pricing_info(data, :billable),
+            category: get_pricing_info(data, :category),
+            pricing_model: get_pricing_info(data, :pricing_model)
+          ]
+        }
+
+      _ ->
+        %Whatsapp.Client.Sender{
+          sender_request: [
+            status_code: 200,
+            waba_id: get_waba_id(data),
+            phone_number_id: get_phone_number_id(data),
+            display_phone_number: get_display_phone_number(data),
+            wa_message_id: get_message_id(data),
+            sender_phone_number:  get_mobile(data),
+            message: get_message(data),
+            message_type: get_message_type(data),
+            flow: is_flow?(data),
+            audio_id: get_audio_id(data),
+            scheduled: false,
+            forwarded: is_forwarded?(data)
+          ]
+        }
+    end
+  end
+  
+
+  def get_waba_id(data) do
+    data = data["entry"]
+    |> List.first()
+    |> Map.get("id")
+  end
+
+
   @doc """
   Checks if the data received from the webhook is a message.
   """
@@ -16,6 +62,82 @@ defmodule WhatsappElixir.Static do
     Map.has_key?(data, "messages")
   end
 
+  def is_forwarded?(data) do
+    data = data["entry"]
+    |> List.first()
+    |> Map.get("changes")
+    |> List.first()
+    |> Map.get("value")
+
+    if Map.has_key?(data, "messages") do
+      if Map.has_key?(List.first(data["messages"]), "context") do
+        data["messages"]
+        |> List.first()
+        |> Map.get("context")
+        |> Map.get("forwarded")
+      else
+        false
+      end
+    else
+      false
+    end
+  end
+
+  def is_flow?(data) do
+    case get_interactive_response(data) do
+      nil -> false
+
+      data ->
+        if Map.has_key?(data, "nfm_reply") do
+          true
+        else
+          false
+        end
+    end
+  end
+
+  #TODO: uncompleted --
+  def get_flow_name(data) do
+    case get_interactive_response(data) do
+      nil -> nil
+
+      data ->
+        if Map.has_key?(data, "nfm_reply") do
+          data
+          |> Map.get("nfm_reply")
+          |> Map.get("name")
+        else
+          nil
+        end
+    end
+  end
+
+  def get_phone_number_id(data) do
+    data = data["entry"]
+    |> List.first()
+    |> Map.get("changes")
+    |> List.first()
+    |> Map.get("value")
+
+    if Map.has_key?(data, "metadata") do
+      data["metadata"]
+      |> Map.get("phone_number_id")
+    end
+  end
+
+  def get_display_phone_number(data) do
+    data = data["entry"]
+    |> List.first()
+    |> Map.get("changes")
+    |> List.first()
+    |> Map.get("value")
+
+    if Map.has_key?(data, "metadata") do
+      data["metadata"]
+      |> Map.get("display_phone_number")
+    end
+  end
+
   @doc """
   Extracts the mobile number of the sender from the data received from the webhook.
   """
@@ -26,12 +148,18 @@ defmodule WhatsappElixir.Static do
     |> List.first()
     |> Map.get("value")
 
-    if Map.has_key?(data, "contacts") do
-      data["contacts"]
-      |> List.first()
-      |> Map.get("wa_id")
-    else
-      nil
+    cond do
+      Map.has_key?(data, "contacts") ->
+        data["contacts"]
+        |> List.first()
+        |> Map.get("wa_id")
+
+      Map.has_key?(data, "statuses") ->
+          data["statuses"]
+          |> List.first()
+          |> Map.get("recipient_id")
+
+      true -> nil
     end
   end
 
@@ -55,10 +183,12 @@ defmodule WhatsappElixir.Static do
     end
   end
 
+  def get_message(data), do: get_message(data, get_message_type(data))
+
   @doc """
   Extracts the text message of the sender from the data received from the webhook.
   """
-  def get_message(data) do
+  defp get_message(data, "text") do
     data = data["entry"]
     |> List.first()
     |> Map.get("changes")
@@ -75,6 +205,8 @@ defmodule WhatsappElixir.Static do
     end
   end
 
+  defp get_message(data, _), do: nil
+
   @doc """
   Extracts the message id of the sender from the data received from the webhook.
   """
@@ -85,12 +217,18 @@ defmodule WhatsappElixir.Static do
     |> List.first()
     |> Map.get("value")
 
-    if Map.has_key?(data, "messages") do
-      data["messages"]
-      |> List.first()
-      |> Map.get("id")
-    else
-      nil
+    cond do
+      Map.has_key?(data, "messages") ->
+        data["messages"]
+        |> List.first()
+        |> Map.get("id")
+
+      Map.has_key?(data, "statuses") ->
+          data["statuses"]
+          |> List.first()
+          |> Map.get("id")
+
+      true -> nil
     end
   end
 
@@ -116,7 +254,7 @@ defmodule WhatsappElixir.Static do
   @doc """
   Extracts the response of the interactive message from the data received from the webhook.
   """
-  def get_interactive_response(data) do
+  defp get_interactive_response(data) do
     data = data["entry"]
     |> List.first()
     |> Map.get("changes")
@@ -189,10 +327,14 @@ defmodule WhatsappElixir.Static do
     end
   end
 
+
+  def get_audio_id(data), do: get_audio_id(data, get_message_type(data))
+
   @doc """
-  Extracts the audio of the sender from the data received from the webhook.
+  Extracts the audio id of the sender from the data received from the webhook.
+  #TODO: implement ffmpeg function
   """
-  def get_audio(data) do
+  def get_audio_id(data, "audio") do
     data = data["entry"]
     |> List.first()
     |> Map.get("changes")
@@ -203,10 +345,13 @@ defmodule WhatsappElixir.Static do
       data["messages"]
       |> List.first()
       |> Map.get("audio")
+      |> Map.get("id")
     else
       nil
     end
   end
+
+  def get_audio_id(data, _), do: nil
 
   @doc """
   Extracts the video of the sender from the data received from the webhook.
@@ -247,9 +392,9 @@ defmodule WhatsappElixir.Static do
   end
 
   @doc """
-  Extracts the delivery status of the message from the data received from the webhook.
+  Extracts the message status [delivered|sent|readed|] of the message from the data received from the webhook.
   """
-  def get_delivery(data) do
+  def get_message_status(data) do
     data = data["entry"]
     |> List.first()
     |> Map.get("changes")
@@ -260,6 +405,27 @@ defmodule WhatsappElixir.Static do
       data["statuses"]
       |> List.first()
       |> Map.get("status")
+    else
+      nil
+    end
+  end
+
+
+  def get_pricing_info(data, field) do
+    data = data["entry"]
+    |> List.first()
+    |> Map.get("changes")
+    |> List.first()
+    |> Map.get("value")
+
+    if Map.has_key?(data, "statuses") do
+      if Map.has_key?(List.first(data["statuses"]), "pricing") do
+        List.first(data["statuses"])
+        |> Map.get("pricing")
+        |> Map.get(Atom.to_string(field))
+      else
+        nil
+      end
     else
       nil
     end
@@ -292,5 +458,10 @@ defmodule WhatsappElixir.Static do
     rescue
       _ -> nil
     end
+  end
+
+  def util_func(json_file) do
+    {:ok, content} = File.read(json_file)
+    Jason.decode!(content)
   end
 end

@@ -1,14 +1,14 @@
 defmodule WhatsappElixir.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
-  @repo_url "https://github.com/Maxino22/whatsapp_elixir"
+  @version "0.1.2"
+  @repo_url "https://github.com/beltrewilton/whatsapp_elixir"
 
   def project do
     [
       app: :whatsapp_elixir,
       version: @version,
-      elixir: "~> 1.16",
+      elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -50,7 +50,7 @@ defmodule WhatsappElixir.MixProject do
 
   defp deps do
     [
-      {:req, "~> 0.3"},
+      {:req, "~> 0.5.6"},
       {:jason, "~> 1.4"},
       {:ex_doc, "~> 0.27.0", only: :dev, runtime: false}
     ]

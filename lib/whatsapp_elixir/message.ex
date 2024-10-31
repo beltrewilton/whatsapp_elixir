@@ -37,3 +37,40 @@ defmodule WhatsappElixir.Message do
     }
   end
 end
+
+
+defmodule Whatsapp.Meta.Request do
+  @meta_request [
+    status_code: nil,
+    waba_id: nil,
+    phone_number_id: nil,
+    display_phone_number: nil,
+    wa_message_id: nil,
+    sender_phone_number: nil,
+    status: nil,
+    billable: nil,
+    category: nil,
+    pricing_model: nil
+  ]
+
+  defstruct meta_request: @meta_request
+end
+
+defmodule Whatsapp.Client.Sender do
+  @sender_request [
+    status_code: nil,
+    waba_id: nil,
+    phone_number_id: nil,
+    display_phone_number: nil,
+    wa_message_id: nil,
+    sender_phone_number: nil,
+    message: nil,
+    message_type: nil,
+    flow: nil,
+    audio_id: nil,
+    scheduled: false,
+    forwarded: false
+  ]
+
+  defstruct sender_request: @sender_request
+end
