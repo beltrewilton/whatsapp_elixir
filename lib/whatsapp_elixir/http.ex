@@ -11,7 +11,7 @@ defmodule WhatsappElixir.HTTP do
     phone_number_id: "",
     verify_token: "",
     base_url: "https://graph.facebook.com",
-    api_version: "v18.0"
+    api_version: "v20.0"
   ]
 
   @spec config(keyword()) :: keyword()

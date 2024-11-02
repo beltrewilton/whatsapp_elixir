@@ -27,7 +27,7 @@ defmodule WhatsappElixir.MixProject do
         extras: ["README.md"],
         links: %{
           "GitHub" => @repo_url,
-          "Sponsor" => "https://github.com/sponsors/Maxino22"
+          "Sponsor" => "https://github.com/beltrewilton/"
         }
       ]
     ]
