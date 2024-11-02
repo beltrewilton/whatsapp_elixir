@@ -52,6 +52,7 @@ defmodule WhatsappElixir.MixProject do
     [
       {:req, "~> 0.5.6"},
       {:jason, "~> 1.4"},
+      {:httpoison, "~> 2.2.1"},
       {:ex_doc, "~> 0.27.0", only: :dev, runtime: false}
     ]
   end

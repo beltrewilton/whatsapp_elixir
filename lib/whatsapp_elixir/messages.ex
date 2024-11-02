@@ -7,11 +7,9 @@ defmodule WhatsappElixir.Messages do
   alias WhatsappElixir.HTTP
   alias WhatsappElixir.Static
 
-
-
   @endpoint "messages"
 
-   @doc """
+  @doc """
     ## Parameters
 
     - `template`: The name of the template to be sent.
@@ -60,7 +58,7 @@ defmodule WhatsappElixir.Messages do
     end
   end
 
-   @doc """
+  @doc """
   Marks a message as read.
   """
   def mark_as_read(message_id, custom_config \\ []) do
@@ -70,7 +68,7 @@ defmodule WhatsappElixir.Messages do
       "message_id" => message_id
     }
 
-    case HTTP.post(@endpoint,payload, custom_config) do
+    case HTTP.post(@endpoint, payload, custom_config) do
       {:ok, response} ->
         Logger.info("Message marked as read: #{inspect(response)}")
         {:ok, response}
@@ -80,7 +78,6 @@ defmodule WhatsappElixir.Messages do
         {:error, response}
     end
   end
-
 
   @doc """
   Replies to a message with a given text.
@@ -111,11 +108,10 @@ defmodule WhatsappElixir.Messages do
     end
   end
 
-
-   @doc """
+  @doc """
   Sends a text message.
   """
-  def send_message(to, content,  custom_config \\ [], preview_url \\ true) do
+  def send_message(to, content, custom_config \\ [], preview_url \\ true) do
     data = %{
       "messaging_product" => "whatsapp",
       "recipient_type" => "individual",
@@ -126,7 +122,7 @@ defmodule WhatsappElixir.Messages do
 
     Logger.info("Sending message to #{to}")
 
-    case HTTP.post(@endpoint,data, custom_config) do
+    case HTTP.post(@endpoint, data, custom_config) do
       {:ok, response} ->
         Logger.info("Message sent to #{to}")
         {:ok, response}
@@ -138,7 +134,6 @@ defmodule WhatsappElixir.Messages do
     end
   end
 
-
   defp get_author(data) do
     Static.get_author(data)
   end
@@ -146,5 +141,4 @@ defmodule WhatsappElixir.Messages do
   defp get_message_id(data) do
     Static.get_message_id(data)
   end
-
 end

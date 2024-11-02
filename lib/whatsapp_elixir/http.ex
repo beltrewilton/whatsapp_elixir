@@ -34,38 +34,39 @@ defmodule WhatsappElixir.HTTP do
   def post(endpoint, body, opts \\ [], include_phone_number_id \\ true) do
     config_opts = config(opts)
 
-
-
     # Get phone_number_id if needed
-     phone_number_id = if include_phone_number_id do
+    phone_number_id =
+      if include_phone_number_id do
         config(config_opts) |> Keyword.get(:phone_number_id)
       end
 
-      if include_phone_number_id and (phone_number_id == "" or phone_number_id == nil) do
-        raise ArgumentError, "phone_number_id must be provided"
-      end
+    if include_phone_number_id and (phone_number_id == "" or phone_number_id == nil) do
+      raise ArgumentError, "phone_number_id must be provided"
+    end
 
     token = config(config_opts) |> Keyword.get(:token)
 
-    if token == ""  do
+    if token == "" do
       raise ArgumentError, "Missing App Token"
     end
 
-     # Construct URL based on whether phone_number_id is included
-    url = if include_phone_number_id do
-      "#{base_url(config_opts)}/#{api_version(config_opts)}/#{phone_number_id}/#{endpoint}"
-    else
-      "#{base_url(config_opts)}/#{api_version(config_opts)}/#{endpoint}"
-    end
-
-
+    # Construct URL based on whether phone_number_id is included
+    url =
+      if include_phone_number_id do
+        "#{base_url(config_opts)}/#{api_version(config_opts)}/#{phone_number_id}/#{endpoint}"
+      else
+        "#{base_url(config_opts)}/#{api_version(config_opts)}/#{endpoint}"
+      end
 
     case Req.post(url, body: Jason.encode!(body), headers: headers(token)) do
       {:ok, %Response{status: status, body: body}} when status in 200..299 ->
         {:ok, body}
 
       {:ok, %Response{status: status, body: body}} ->
-        Logger.error("[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}")
+        Logger.error(
+          "[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}"
+        )
+
         {:error, Jason.decode!(body)}
 
       {:error, reason} ->
@@ -73,7 +74,6 @@ defmodule WhatsappElixir.HTTP do
         {:error, reason}
     end
   end
-
 
   def get(endpoint, params \\ %{}, opts \\ []) do
     config_opts = config(opts)
@@ -94,13 +94,15 @@ defmodule WhatsappElixir.HTTP do
 
     full_url = if query_string != "", do: "#{url}?#{query_string}", else: url
 
-
     case Req.get(full_url, headers: headers(token)) do
       {:ok, %Response{status: status, body: body}} when status in 200..299 ->
-        {:ok,Jason.decode!(body) }
+        {:ok, Jason.decode!(body)}
 
       {:ok, %Response{status: status, body: body}} ->
-        Logger.error("[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}")
+        Logger.error(
+          "[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}"
+        )
+
         {:error, body}
 
       {:error, reason} ->
@@ -109,8 +111,7 @@ defmodule WhatsappElixir.HTTP do
     end
   end
 
-
-    @doc """
+  @doc """
   Sends a DELETE request to the specified endpoint with the given parameters.
   """
   def delete(endpoint, params, opts \\ []) do
@@ -132,14 +133,15 @@ defmodule WhatsappElixir.HTTP do
 
     full_url = if query_string != "", do: "#{url}?#{query_string}", else: url
 
-   
-
     case Req.delete(full_url, headers: headers(token)) do
       {:ok, %Response{status: status, body: body}} when status in 200..299 ->
         {:ok, Jason.decode!(body)}
 
       {:ok, %Response{status: status, body: body}} ->
-        Logger.error("[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}")
+        Logger.error(
+          "[WHATSAPP_ELIXIR] HTTP request failed with status #{status}: #{inspect(body)}"
+        )
+
         {:error, body}
 
       {:error, reason} ->
@@ -148,9 +150,7 @@ defmodule WhatsappElixir.HTTP do
     end
   end
 
-
   defp headers(token) do
-
     [
       {"Content-Type", "application/json"},
       {"Authorization", "Bearer #{token}"}

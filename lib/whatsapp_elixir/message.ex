@@ -38,7 +38,6 @@ defmodule WhatsappElixir.Message do
   end
 end
 
-
 defmodule Whatsapp.Meta.Request do
   @meta_request [
     status_code: nil,
