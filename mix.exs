@@ -54,6 +54,7 @@ defmodule WhatsappElixir.MixProject do
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:uuid, "~> 1.1"},
+      {:whatsapp_flow_crypto, "~> 0.1.0"},
       {:ex_doc, "~> 0.27.0", only: :dev, runtime: false}
     ]
   end
