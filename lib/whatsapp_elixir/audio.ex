@@ -3,13 +3,13 @@ defmodule WhatsappElixir.Audio do
 
   # WhatsappElixir.Audio.get("1301759660809236", "99999", "MDX01")
 
-  def get(audio_id, msisdn, campaign) do
-    synaia_meta_user_token = System.get_env("SYNAIA_META_USER_TOKEN")
+  def get(audio_id, msisdn, campaign, waba_id) do
+    cloud_api_token = System.get_env("CLOUD_API_TOKEN")
     audio_recording_path = System.get_env("AUDIO_RECORDING_PATH")
-    filename = "#{audio_recording_path}/#{msisdn}-#{campaign}.ogg"
+    filename = "#{audio_recording_path}/#{waba_id}-#{msisdn}-#{campaign}.ogg"
 
     headers = %{
-      "Authorization" => "Bearer #{synaia_meta_user_token}",
+      "Authorization" => "Bearer #{cloud_api_token}",
       "Content-Type" => "application/json"
     }
 
@@ -34,7 +34,7 @@ defmodule WhatsappElixir.Audio do
     download_file_async(resp, file)
   end
 
-  def download(_) do
+  defp download(_) do
     IO.puts("Error, :(")
   end
 
