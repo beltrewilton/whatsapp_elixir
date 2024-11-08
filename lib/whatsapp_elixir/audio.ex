@@ -3,10 +3,11 @@ defmodule WhatsappElixir.Audio do
 
   # WhatsappElixir.Audio.get("1301759660809236", "99999", "MDX01")
 
-  def get(audio_id, msisdn, campaign, waba_id) do
+  def get(audio_id, msisdn, campaign, waba_id, task) do
     cloud_api_token = System.get_env("CLOUD_API_TOKEN")
     audio_recording_path = System.get_env("AUDIO_RECORDING_PATH")
-    filename = "#{audio_recording_path}/#{waba_id}-#{msisdn}-#{campaign}.ogg"
+    task = Atom.to_string(task)
+    filename = "#{audio_recording_path}/#{waba_id}-#{msisdn}-#{campaign}-#{task}.ogg"
 
     headers = %{
       "Authorization" => "Bearer #{cloud_api_token}",
