@@ -70,18 +70,15 @@ defmodule WhatsappElixir.Static do
       |> List.first()
       |> Map.get("value")
 
-    if Map.has_key?(data, "messages") do
-      if Map.has_key?(List.first(data["messages"]), "context") do
-        data["messages"]
-        |> List.first()
-        |> Map.get("context")
-        |> Map.get("forwarded")
-      else
-        false
+      case data do
+        %{"messages" => [%{"context" => %{"forwarded" => forwarded}} | _]} -> forwarded
+        _ -> false
       end
-    else
-      false
-    end
+  end
+
+  def pronto(file) do
+    file = File.read!(file)
+    Jason.decode!(file)
   end
 
   def is_flow?(data) do
