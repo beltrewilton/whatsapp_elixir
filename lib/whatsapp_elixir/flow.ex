@@ -9,6 +9,67 @@ defmodule WhatsappElixir.Flow do
 
   @endpoint "messages"
 
+  def send_flow_as_message(to, data, custom_config \\ [], opts \\ []) do
+    template_name = Keyword.get(opts, :template_name)
+    image_link = Keyword.get(opts, :image_link)
+    screen = Keyword.get(opts, :screen)
+
+    payload = %{
+      "recipient_type" => "individual",
+      "messaging_product" => "whatsapp",
+      "to" => to,
+      "type" => "template",
+      "template" => %{
+        "name" => template_name,
+        "language" => %{
+          "code" => "en"
+        },
+        "components" => [
+          %{
+            "type" => "header",
+            "parameters" => [
+              %{
+                "type" => "image",
+                "image" => %{
+                  "link" => image_link
+                }
+              }
+            ]
+          },
+          %{
+            "type" => "button",
+            "sub_type" => "flow",
+            "index" => "0",
+            "parameters" => [
+              %{
+                "type" => "action",
+                "action" => %{
+                  "flow_token" => UUID.uuid4(),
+                  "flow_action_data" => data
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    IO.inspect(payload, label: "Payload")
+
+    Logger.info("Sending flow to #{to}")
+
+    case HTTP.post(@endpoint, payload, custom_config) do
+      {:ok, response} ->
+        Logger.info("Flow sent to #{to}")
+        {:ok, response}
+
+      {:error, response} ->
+        Logger.error("Flow not sent to #{to}")
+        Logger.error("Response: #{inspect(response)}")
+        {:error, response}
+    end
+  end
+
   def send_flow(to, data, custom_config \\ [], opts \\ []) do
     flow_id = Keyword.get(opts, :flow_id)
     cta = Keyword.get(opts, :cta)
@@ -17,7 +78,7 @@ defmodule WhatsappElixir.Flow do
     header = Keyword.get(opts, :header, "Flow message header")
     body = Keyword.get(opts, :body, "Flow message body")
     footer = Keyword.get(opts, :footer, "Flow message footer")
-    mode = Keyword.get(opts, :mode, "draft")
+    mode = Keyword.get(opts, :mode)
 
     payload = %{
       "recipient_type" => "individual",
@@ -72,7 +133,6 @@ defmodule WhatsappElixir.Flow do
     encrypted_flow_data = data["encrypted_flow_data"]
     encrypted_aes_key = data["encrypted_aes_key"]
     initial_vector = data["initial_vector"]
-
 
     {:ok, ref} = WhatsappFlowCrypto.fetch_private_key(private_key_pem)
 
