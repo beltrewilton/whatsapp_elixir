@@ -1,20 +1,33 @@
-defmodule WhatsappElixir.Audio do
+defmodule WhatsappElixir.MediaDl do
   @api_url "https://graph.facebook.com/v20.0/"
 
   # WhatsappElixir.Audio.get("1301759660809236", "99999", "MDX01")
 
-  def get(audio_id, msisdn, campaign, waba_id, task) do
+  def get(media_id, msisdn, campaign, waba_id, task, media_type) do
     cloud_api_token = System.get_env("CLOUD_API_TOKEN")
-    audio_recording_path = System.get_env("AUDIO_RECORDING_PATH")
     task = Atom.to_string(task)
-    filename = "#{audio_recording_path}/#{waba_id}-#{msisdn}-#{campaign}-#{task}.ogg"
+
+    filename =
+      case media_type do
+         :audio ->
+          recording_path = System.get_env("AUDIO_RECORDING_PATH")
+          "#{recording_path}/#{waba_id}-#{msisdn}-#{campaign}-#{task}.ogg"
+
+         :video ->
+          recording_path = System.get_env("VIDEO_RECORDING_PATH")
+          "#{recording_path}/#{waba_id}-#{msisdn}-#{campaign}-#{task}.mp4"
+
+         :image ->
+          recording_path = System.get_env("IMAGE_RECORDING_PATH")
+          "#{recording_path}/#{waba_id}-#{msisdn}-#{campaign}-#{task}.png"
+      end
 
     headers = %{
       "Authorization" => "Bearer #{cloud_api_token}",
       "Content-Type" => "application/json"
     }
 
-    url = @api_url <> audio_id
+    url = @api_url <> media_id
 
     case HTTPoison.get(url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->

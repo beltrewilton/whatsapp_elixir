@@ -67,6 +67,7 @@ defmodule Whatsapp.Client.Sender do
     message_type: nil,
     flow: nil,
     audio_id: nil,
+    video_id: nil,
     scheduled: false,
     forwarded: false
   ]

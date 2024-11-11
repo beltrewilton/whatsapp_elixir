@@ -34,6 +34,7 @@ defmodule WhatsappElixir.Static do
             message_type: get_message_type(data),
             flow: is_flow?(data),
             audio_id: get_audio_id(data),
+            video_id: get_video_id(data),
             scheduled: false,
             forwarded: is_forwarded?(data)
           ]
@@ -365,6 +366,34 @@ defmodule WhatsappElixir.Static do
   end
 
   def get_audio_id(data, _), do: nil
+
+
+
+  def get_video_id(data), do: get_video_id(data, get_message_type(data))
+
+  @doc """
+  Extracts the audio id of the sender from the data received from the webhook.
+  #TODO: implement ffmpeg function
+  """
+  def get_video_id(data, "video") do
+    data =
+      data["entry"]
+      |> List.first()
+      |> Map.get("changes")
+      |> List.first()
+      |> Map.get("value")
+
+    if Map.has_key?(data, "messages") do
+      data["messages"]
+      |> List.first()
+      |> Map.get("video")
+      |> Map.get("id")
+    else
+      nil
+    end
+  end
+
+  def get_video_id(data, _), do: nil
 
   @doc """
   Extracts the video of the sender from the data received from the webhook.
