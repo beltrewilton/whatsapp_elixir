@@ -55,8 +55,8 @@ defmodule WhatsappElixir.MixProject do
       {:httpoison, "~> 2.2.1"},
       {:uuid, "~> 1.1"},
       {:ex_doc, "~> 0.27.0", only: :dev, runtime: false},
-      {:whatsapp_flow_crypto, path: "/home/wilton/plex_env/whatsapp_flow_crypto"}
-      # {:whatsapp_flow_crypto, path: "/Users/beltre.wilton/apps/whatsapp_flow_crypto"}
+      # {:whatsapp_flow_crypto, path: "/home/wilton/plex_env/whatsapp_flow_crypto"}
+      {:whatsapp_flow_crypto, path: "/Users/beltre.wilton/apps/whatsapp_flow_crypto"}
     ]
   end
 end
