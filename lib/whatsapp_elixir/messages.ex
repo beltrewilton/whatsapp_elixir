@@ -111,8 +111,8 @@ defmodule WhatsappElixir.Messages do
   @doc """
   Sends a text message.
   """
-  def send_message(to, content, custom_config \\ [], preview_url \\ true) do
-    data = %{
+  def send_message(to, content, custom_config \\ [], wa_id \\ nil, preview_url \\ true) do
+    base = %{
       "messaging_product" => "whatsapp",
       "recipient_type" => "individual",
       "to" => to,
@@ -120,7 +120,32 @@ defmodule WhatsappElixir.Messages do
       "text" => %{"preview_url" => preview_url, "body" => content}
     }
 
+    data = if not is_nil(wa_id), do: Map.put(base, "context", %{ "message_id" => wa_id }), else: base
+
     Logger.info("Sending message to #{to}")
+
+    case HTTP.post(@endpoint, data, custom_config) do
+      {:ok, response} ->
+        Logger.info("Message sent to #{to}")
+        {:ok, response}
+
+      {:error, response} ->
+        Logger.error("Message not sent to #{to}")
+        Logger.error("Response: #{inspect(response)}")
+        {:error, response}
+    end
+  end
+
+  def send_raction_message(to, wa_id, custom_config \\ []) do
+    data = %{
+      "messaging_product" => "whatsapp",
+      "recipient_type" => "individual",
+      "to" => to,
+      "type" => "reaction",
+      "reaction" => %{"message_id" => wa_id, "emoji" => "\u{1F44D}"} # \uD83D\uDC4D
+    }
+
+    Logger.info("Sending emoji reaction to #{to}")
 
     case HTTP.post(@endpoint, data, custom_config) do
       {:ok, response} ->
