@@ -49,14 +49,18 @@ defmodule WhatsappElixir.MixProject do
   end
 
   defp deps do
+    # export WHATSAPP_FLOW_CRYPTO_PATH=/Users/beltre.wilton/apps/whatsapp_flow_crypto
+    # export WHATSAPP_FLOW_CRYPTO_PATH=/home/wilton/plex_env/whatsapp_flow_crypto
+
+    whatsapp_flow_crypto_path = System.get_env("WHATSAPP_FLOW_CRYPTO_PATH")
+
     [
       {:req, "~> 0.5.6"},
       {:jason, "~> 1.4"},
       {:httpoison, "~> 2.2.1"},
       {:uuid, "~> 1.1"},
       {:ex_doc, "~> 0.27.0", only: :dev, runtime: false},
-      {:whatsapp_flow_crypto, path: "/home/wilton/plex_env/whatsapp_flow_crypto"}
-      # {:whatsapp_flow_crypto, path: "/Users/beltre.wilton/apps/whatsapp_flow_crypto"}
+      {:whatsapp_flow_crypto, path: whatsapp_flow_crypto_path}
     ]
   end
 end
